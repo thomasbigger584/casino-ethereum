@@ -1,4 +1,4 @@
-pragma solidity 0.4.20; // compiler version
+pragma solidity 0.5.8; // compiler version
 
 /*
 https://solidity.readthedocs.io/en/v0.4.20/units-and-global-variables.html
@@ -17,7 +17,7 @@ contract Casino {
 
     //The address variable called owner is that long string from your Metamask account
     //Something like 0x08f96d0f5C9086d7f6b59F9310532BdDCcF536e2
-    address public owner;
+    address payable public owner;
 
     uint256 public minimumBet;
     uint256 public totalBet;
@@ -41,14 +41,14 @@ contract Casino {
     //Fallback function in case someone sends ether to the contract so it
     //doesn't get lost and to increase the treasury of this contract that will be distributed in each game
     //This will allow you to save the ether you send to the contract. Otherwise it would be rejected
-    function() public payable {}
+    function() external payable {}
 
 
 
 
     //Constructor
     //Defining the minimum bet for the game
-    function Casino(uint256 _minimumBet) public {
+    constructor(uint256 _minimumBet) public {
         //The user address that created this contract is the owner
         owner = msg.sender;
         if (_minimumBet != 0) minimumBet = _minimumBet;
@@ -90,7 +90,7 @@ contract Casino {
     //It’s returning an already existing value from the blockchain
     //Loops through the maintained players list and checks if the player is in it
     //It is free to the sender because we are checking a variable already in the chain
-    function checkPlayerExists(address player) public constant returns (bool){
+    function checkPlayerExists(address player) public view returns (bool){
         for (uint256 i = 0; i < players.length; i++) {
             if (players[i] == player) return true;
         }
@@ -132,8 +132,7 @@ contract Casino {
             delete playerInfo[playerAddress];
         }
 
-        //resetting the players array
-        players.length = 0;
+        resetData();
 
         //calculating how much ether to send to winners
         uint256 winnerEtherAmount = totalBet / winners.length;
@@ -144,9 +143,15 @@ contract Casino {
             //sanity check
             //check when iterating through array that it is an actual address and not an empty address
             if (winners[j] != address(0)) {
-                winners[j].transfer(winnerEtherAmount);
+                address(uint160(winners[j])).transfer(winnerEtherAmount);
             }
         }
+    }
+
+    function resetData() public {
+        players.length = 0;
+        totalBet = 0;
+        numberOfBets = 0;
     }
 
 
