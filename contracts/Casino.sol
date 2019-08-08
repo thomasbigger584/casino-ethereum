@@ -67,9 +67,9 @@ contract Casino {
 
         //some sanity checks
         //If the function exits here then ether paid is reverted to the sender.
-        require(!checkPlayerExists(msg.sender));
-        require(numberSelected >= 1 && numberSelected <= 10);
-        require(msg.value >= minimumBet);
+        require((!checkPlayerExists(msg.sender)), "Player already exists in thgis game");
+        require((numberSelected >= 1 && numberSelected <= 10), "Number not in range");
+        require((msg.value >= minimumBet), "Minimum bet not reached");
 
         //adding the player to the mapping
         //their address is the key, the amount they are betting and the number selected
